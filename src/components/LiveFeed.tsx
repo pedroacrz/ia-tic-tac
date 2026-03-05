@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { MOCK_WINS } from '../data/mockData';
 import type { SkinRarity } from '../types';
 

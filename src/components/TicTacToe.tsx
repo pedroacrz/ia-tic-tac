@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { RotateCcw, Trophy, Users, Wifi, WifiOff, Hash } from 'lucide-react';
+import { RotateCcw, Trophy, Wifi, Hash } from 'lucide-react';
 
 type SquareValue = 'X' | 'O' | null;
 
@@ -9,7 +9,6 @@ const TicTacToe: React.FC = () => {
     const [roomId, setRoomId] = useState<string>('');
     const [joinedRoom, setJoinedRoom] = useState<string | null>(null);
     const [mySymbol, setMySymbol] = useState<SquareValue>(null);
-    const [status, setStatus] = useState<string>('Enter a Room ID to start');
     const [isConnected, setIsConnected] = useState<boolean>(false);
 
     const ws = useRef<WebSocket | null>(null);
@@ -23,7 +22,7 @@ const TicTacToe: React.FC = () => {
     const connectToRoom = () => {
         if (!roomId.trim()) return;
 
-        ws.current = new WebSocket('ws://localhost:8080');
+        ws.current = new WebSocket('ws://147.79.83.68:8080');
 
         ws.current.onopen = () => {
             setIsConnected(true);
@@ -36,15 +35,13 @@ const TicTacToe: React.FC = () => {
             if (data.type === 'joined') {
                 setMySymbol(data.symbol);
                 setJoinedRoom(data.roomId);
-                setStatus('Waiting for opponent...');
             } else if (data.type === 'start') {
-                setStatus('Game Started!');
+                // Game starts
             } else if (data.type === 'move') {
                 handleRemoteMove(data.index, data.symbol);
             } else if (data.type === 'reset') {
                 handleRemoteReset();
             } else if (data.type === 'opponentLeft') {
-                setStatus('Opponent left. Waiting for a new player...');
                 handleRemoteReset();
             } else if (data.type === 'error') {
                 alert(data.message);
@@ -57,7 +54,6 @@ const TicTacToe: React.FC = () => {
             setIsConnected(false);
             setJoinedRoom(null);
             setMySymbol(null);
-            setStatus('Disconnected');
         };
     };
 

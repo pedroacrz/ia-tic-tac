@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingBag, Repeat, ShieldCheck, Gamepad2, Bell, Plus, ChevronDown, User, Search } from 'lucide-react';
+import { ShoppingBag, Repeat, ShieldCheck, Gamepad2, Bell, Plus, ChevronDown } from 'lucide-react';
 
 interface HeaderProps {
   activeView: string;
