@@ -16,7 +16,7 @@ wss.on('connection', (ws) => {
             currentRoomId = roomId;
 
             if (!rooms.has(roomId)) {
-                rooms.set(roomId, { players: [], startingPlayer: 'X' });
+                rooms.set(roomId, { players: [], startingPlayer: Math.random() > 0.5 ? 'X' : 'O' });
             }
 
             const room = rooms.get(roomId);
