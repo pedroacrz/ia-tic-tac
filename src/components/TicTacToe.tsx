@@ -36,13 +36,13 @@ const TicTacToe: React.FC = () => {
                 setMySymbol(data.symbol);
                 setJoinedRoom(data.roomId);
             } else if (data.type === 'start') {
-                // Game starts
+                setXIsNext(data.turn === 'X');
             } else if (data.type === 'move') {
                 handleRemoteMove(data.index, data.symbol);
             } else if (data.type === 'reset') {
-                handleRemoteReset();
+                handleRemoteReset(data.startingPlayer);
             } else if (data.type === 'opponentLeft') {
-                handleRemoteReset();
+                handleRemoteReset('X');
             } else if (data.type === 'error') {
                 alert(data.message);
                 ws.current?.close();
@@ -66,9 +66,9 @@ const TicTacToe: React.FC = () => {
         setXIsNext(symbol === 'O');
     };
 
-    const handleRemoteReset = () => {
+    const handleRemoteReset = (startingPlayer: SquareValue) => {
         setSquares(Array(9).fill(null));
-        setXIsNext(true);
+        setXIsNext(startingPlayer === 'X');
     };
 
     const calculateWinner = (squares: SquareValue[]) => {

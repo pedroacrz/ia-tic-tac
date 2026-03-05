@@ -16,18 +16,18 @@ wss.on('connection', (ws) => {
             currentRoomId = roomId;
 
             if (!rooms.has(roomId)) {
-                rooms.set(roomId, []);
+                rooms.set(roomId, { players: [], startingPlayer: 'X' });
             }
 
             const room = rooms.get(roomId);
-            if (room.length < 2) {
-                playerSymbol = room.length === 0 ? 'X' : 'O';
-                room.push(ws);
+            if (room.players.length < 2) {
+                playerSymbol = room.players.length === 0 ? 'X' : 'O';
+                room.players.push(ws);
                 ws.send(JSON.stringify({ type: 'joined', symbol: playerSymbol, roomId }));
 
-                if (room.length === 2) {
-                    room.forEach(client => {
-                        client.send(JSON.stringify({ type: 'start', turn: 'X' }));
+                if (room.players.length === 2) {
+                    room.players.forEach(client => {
+                        client.send(JSON.stringify({ type: 'start', turn: room.startingPlayer }));
                     });
                 }
             } else {
@@ -38,7 +38,7 @@ wss.on('connection', (ws) => {
         if (message.type === 'move') {
             const room = rooms.get(currentRoomId);
             if (room) {
-                room.forEach(client => {
+                room.players.forEach(client => {
                     if (client !== ws) {
                         client.send(JSON.stringify({ type: 'move', index: message.index, symbol: message.symbol }));
                     }
@@ -49,8 +49,10 @@ wss.on('connection', (ws) => {
         if (message.type === 'reset') {
             const room = rooms.get(currentRoomId);
             if (room) {
-                room.forEach(client => {
-                    client.send(JSON.stringify({ type: 'reset' }));
+                // Toggle starting player
+                room.startingPlayer = room.startingPlayer === 'X' ? 'O' : 'X';
+                room.players.forEach(client => {
+                    client.send(JSON.stringify({ type: 'reset', startingPlayer: room.startingPlayer }));
                 });
             }
         }
@@ -59,13 +61,13 @@ wss.on('connection', (ws) => {
     ws.on('close', () => {
         if (currentRoomId && rooms.has(currentRoomId)) {
             const room = rooms.get(currentRoomId);
-            const index = room.indexOf(ws);
+            const index = room.players.indexOf(ws);
             if (index !== -1) {
-                room.splice(index, 1);
-                if (room.length === 0) {
+                room.players.splice(index, 1);
+                if (room.players.length === 0) {
                     rooms.delete(currentRoomId);
                 } else {
-                    room.forEach(client => {
+                    room.players.forEach(client => {
                         client.send(JSON.stringify({ type: 'opponentLeft' }));
                     });
                 }
